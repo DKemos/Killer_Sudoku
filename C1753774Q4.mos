@@ -1,0 +1,73 @@
+model Question_4
+uses "mmxprs";
+
+m := 6     ! Dimensions of Sudoku
+
+declarations
+	 
+row = 1..m                            ! Number of Sudoku Rows
+
+column = 1..m                         ! Number of Sudoku Columns
+
+value = 1..m                          ! Integer value varies from the possible variables of a cell (1 - 6)
+
+x : array (row,column,value) of mpvar ! Array as a Desicion Variable  
+  Objective:linctr 
+  
+end-declarations
+
+! A genuine value is allowed on each grid of the sudoku, based on the rules of the game
+forall(v in value) x(1,1,v)+x(1,2,v)+x(1,3,v)+x(2,1,v)+x(2,2,v)+x(2,3,v)=1 ! Genuine value in 1st Grid
+forall(v in value) x(1,4,v)+x(1,5,v)+x(1,6,v)+x(2,4,v)+x(2,5,v)+x(2,6,v)=1 ! Genuine value in 2nd Grid 
+forall(v in value) x(3,1,v)+x(3,2,v)+x(3,3,v)+x(4,1,v)+x(4,2,v)+x(4,3,v)=1 ! Genuine value in 3rd Grid
+forall(v in value) x(3,4,v)+x(3,5,v)+x(3,6,v)+x(4,4,v)+x(4,5,v)+x(4,6,v)=1 ! Genuine value in 4th Grid
+forall(v in value) x(5,1,v)+x(5,2,v)+x(5,3,v)+x(6,1,v)+x(6,2,v)+x(6,3,v)=1 ! Genuine value in 5th Grid
+forall(v in value) x(5,4,v)+x(5,5,v)+x(5,6,v)+x(6,4,v)+x(6,5,v)+x(6,6,v)=1 ! Genuine value in 6th Grid
+
+! Contrains for the cages included in the given Killer Sudoku
+sum(v in value) v*x(1,1,v)+sum(v in value) v*x(1,2,v)=7
+sum(v in value) v*x(1,3,v)+sum(v in value) v*x(2,3,v)=5
+sum(v in value) v*x(1,4,v)+sum(v in value) v*x(1,5,v)=7 
+sum(v in value) v*x(1,6,v)+sum(v in value) v*x(2,6,v)=7
+sum(v in value) v*x(2,1,v)+sum(v in value) v*x(2,2,v)=9
+sum(v in value) v*x(2,4,v)+sum(v in value) v*x(3,4,v)=10
+sum(v in value) v*x(2,5,v)+sum(v in value) v*x(3,5,v)=3
+sum(v in value) v*x(3,1,v)+sum(v in value) v*x(4,1,v)=4
+sum(v in value) v*x(3,2,v)+sum(v in value) v*x(3,3,v)=11
+sum(v in value) v*x(3,6,v)+sum(v in value) v*x(4,6,v)=7
+sum(v in value) v*x(4,2,v)+sum(v in value) v*x(4,3,v)=6
+sum(v in value) v*x(4,4,v)+sum(v in value) v*x(4,5,v)=8
+sum(v in value) v*x(5,1,v)+sum(v in value) v*x(6,1,v)=7
+sum(v in value) v*x(5,2,v)+sum(v in value) v*x(5,3,v)=4
+sum(v in value) v*x(5,4,v)+sum(v in value) v*x(6,4,v)=3
+sum(v in value) v*x(5,5,v)+sum(v in value) v*x(6,5,v)=11
+sum(v in value) v*x(5,6,v)+sum(v in value) v*x(6,6,v)=7
+sum(v in value) v*x(6,2,v)+sum(v in value) v*x(6,3,v)=10
+
+
+forall(c in column,v in value) sum(r in row) x(r,c,v)=1      ! Genuine value in each column based on sudoku rules
+
+forall (r in row,v in value) sum(c in column) x(r,c,v)=1     ! Genuine value in each row based on sudoku rules
+
+forall(r in row, c in column) sum(v in value) x(r,c,v)=1     ! Only one value for each sudoku cell
+
+forall(r in row, c in column, v in value) x(r,c,v) is_binary ! The integer value appears in each element (r,c,v)
+
+obj:= x(1,1,1) 
+minimise(obj)
+
+writeln("\nKiller Sudoku Table")
+writeln("---------------------")
+
+forall ( r in row) do
+	writeln("\n_______________________")
+	forall ( c in column) do
+		forall ( v in value ) do
+			if (getsol(x(r,c,v)) = 1) then
+				write(v," | ")
+			end-if
+		end-do
+	end-do
+end-do
+writeln("\n_______________________")
+end-model
